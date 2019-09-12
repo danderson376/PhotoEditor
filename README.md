@@ -9,8 +9,8 @@ https://github.com/danderson376/PhotoEditor.git
 //Any Extra Credit
 
 //Each Teammate's Contribution
-//David Anderson:
-//Robert Thompson:
+David Anderson:
+Robert Thompson:
 //Percentage of work done by each teammate
-//David Anderson:
-//Robert Thompson:
+David Anderson:
+Robert Thompson:
