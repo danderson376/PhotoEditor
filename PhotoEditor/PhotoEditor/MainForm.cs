@@ -25,7 +25,7 @@ namespace PhotoEditor
 
         private async Task InitializePhotoList_Async() //example to get double click to work. Need to change to get photos from disk
         {
-            
+
             await Task.Run(() =>
             {
                 DirectoryInfo homeDir = new DirectoryInfo("C:\\Pictures");
@@ -39,7 +39,7 @@ namespace PhotoEditor
                         Console.WriteLine("Filename: " + file.Name);
                         Console.WriteLine("Last mod: " + file.LastWriteTime.ToString());
                         Console.WriteLine("File size: " + file.Length);
-                       
+
                     }
                     catch
                     {

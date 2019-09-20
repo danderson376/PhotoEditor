@@ -16,5 +16,16 @@ namespace PhotoEditor
         {
             InitializeComponent();
         }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            //add code to reverse all changes
+            Close();
+        }
     }
 }
