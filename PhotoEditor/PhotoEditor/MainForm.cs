@@ -25,7 +25,7 @@ namespace PhotoEditor
         }
 
         private async Task InitializePhotoList_Async() //example to get double click to work. Need to change to get photos from disk
-        {
+        {                                              //feel free to change any of the code that relates to the main form, but leave EditPhotoForm to me
 
 
             await Task.Run(() =>
