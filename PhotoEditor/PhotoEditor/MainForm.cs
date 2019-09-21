@@ -20,11 +20,13 @@ namespace PhotoEditor
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
+            var photoList = new ListView();
             await InitializePhotoList_Async();
         }
 
         private async Task InitializePhotoList_Async() //example to get double click to work. Need to change to get photos from disk
         {
+
 
             await Task.Run(() =>
             {
@@ -65,6 +67,12 @@ namespace PhotoEditor
                 this.PhotoList.SelectedItems.Clear();
                 MessageBox.Show("No Item is selected");
             }
+        }
+
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutForm aboutBox = new AboutForm();  //creates new editBox Every time an item is double clicked
+            aboutBox.ShowDialog(this);
         }
     }
 }
