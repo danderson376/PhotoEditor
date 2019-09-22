@@ -23,6 +23,7 @@ namespace PhotoEditor
 		public MainForm()
         {
             InitializeComponent();
+            listView1.MouseDoubleClick += new MouseEventHandler(listView1_MouseDoubleClick);
         }
 
         private async void MainForm_Load(object sender, EventArgs e)
@@ -83,15 +84,15 @@ namespace PhotoEditor
 			});
 		}
 
-		private void PhotoList_MouseDoubleClick(object sender, MouseEventArgs e) //found this function at https://stackoverflow.com/questions/12872740/doubleclick-on-a-row-in-listview 
+		private void listView1_MouseDoubleClick(object sender, MouseEventArgs e) //found this function at https://stackoverflow.com/questions/12872740/doubleclick-on-a-row-in-listview 
         {                                                                        //Username of Author: XIVSolutions
-            ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);
-            ListViewItem item = info.Item;
-            Image image = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\" + item.ImageKey);
+            //ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);
+            //ListViewItem item = info.Item;
+            Image image = Image.FromFile("C:\\Users\\danderson3\\Pictures\\batman1.jpg");
 
+            
 
-
-            if (item != null)
+            if (image != null)
             {
                 //MessageBox.Show("The selected Item Name is: " + item.Text);
                 EditPhotoForm editBox = new EditPhotoForm(image);  //creates new editBox Every time an item is double clicked
@@ -99,9 +100,11 @@ namespace PhotoEditor
             }
             else
             {
-                this.PhotoList.SelectedItems.Clear();
+                //this.PhotoList.SelectedItems.Clear();
                 MessageBox.Show("No Item is selected");
             }
+
+
 
         }
 
