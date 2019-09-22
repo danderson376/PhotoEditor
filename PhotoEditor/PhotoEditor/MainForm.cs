@@ -17,6 +17,7 @@ namespace PhotoEditor
         private int lengthOfFiles;
 	    private PhotoListing _photoListing;
 	    private string _fullPath;
+        private View mainView;
 	    public delegate TreeView Add();
         public delegate void HideProgress();
         public delegate void SetTotalAmount();
@@ -88,6 +89,7 @@ namespace PhotoEditor
                     {
                         var itemPerFile = _photoListing.GetFilesAndImages(file, ref smallImageList, ref largImageList, ref i);
                         listView1.Invoke(new AddListItem(() => this.listView1.Items.Add(itemPerFile)));
+                        Thread.Sleep(50);
                         if (i <= lengthOfFiles && i > 0)
                         {
                             progressBar1.Invoke(new AddToProgressBar(() => this.progressBar1.Value = i));
@@ -100,8 +102,12 @@ namespace PhotoEditor
 				}
 		        listView1.Invoke(new AddImageList(() => listView1.SmallImageList = smallImageList));
 		        listView1.Invoke(new AddImageList(() => listView1.LargeImageList = largImageList));
-		        listView1.Invoke(new GetView(() => this.listView1.View = View.Details));
+		        listView1.Invoke(new GetView(() => this.listView1.View = mainView));
                 progressBar1.Invoke(new HideProgress(() => this.progressBar1.Visible = false));
+                if(cancellationTokenSource.IsCancellationRequested==true)
+                {
+                    GetListView(_fullPath);
+                }
 			});
 
         }
@@ -111,6 +117,7 @@ namespace PhotoEditor
 			await Task.Run(() =>
 			{
 				var treeNodeHolder = _photoListing.ListDirectory();
+                mainView = View.Details;
 				Action showTreeView = () => treeView1.Nodes.Add(treeNodeHolder);
 				Invoke(showTreeView);
 			});
@@ -132,7 +139,6 @@ namespace PhotoEditor
                 this.listView1.SelectedItems.Clear();
                 MessageBox.Show("No Item is selected");
             }
-
         }
 
 		private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -181,16 +187,19 @@ namespace PhotoEditor
 
 		private void DetailToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+            mainView = View.Details;
 			this.listView1.View = View.Details;
 		}
 
 		private void SmallToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+            mainView = View.SmallIcon;
 			this.listView1.View = View.SmallIcon;
 		}
 
 		private void LargeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+            mainView = View.LargeIcon;
 			this.listView1.View = View.LargeIcon;
 		}
 

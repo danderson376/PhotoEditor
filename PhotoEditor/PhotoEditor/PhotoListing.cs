@@ -44,7 +44,7 @@ namespace PhotoEditor
 			columnHeader1.Width = 250;
 			columnHeader2.Text = "Date";
 			columnHeader2.Width = 200;
-			columnHeader3.Text = "Size";
+			columnHeader3.Text = "Size(bytes)";
 			columnHeader3.Width = 100;
 			var returnColumnHeader = new ColumnHeader[]{columnHeader1,columnHeader2,columnHeader3};
 			return returnColumnHeader;
