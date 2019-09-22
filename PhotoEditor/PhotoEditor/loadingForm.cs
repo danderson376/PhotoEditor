@@ -19,7 +19,7 @@ namespace PhotoEditor
         {
             InitializeComponent();
             //invertedBitmap = new Bitmap(img);
-           // myImage = img;
+            // myImage = img;
             //startButton.Enabled = false;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -44,6 +44,6 @@ namespace PhotoEditor
 
         }
 
-        
+
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,17 +16,21 @@ namespace PhotoEditor
     {
         private Image myImage;
         Bitmap transformedBitmap;
+        private string fullPathOfImage;
+        private string imageName;
         private CancellationTokenSource cancellationTokenSource;
 
 
-        public EditPhotoForm(Image img)
+        public EditPhotoForm(Image img, string fullPath, string nameOfImage)
         {
             InitializeComponent();
             myImage = img;
+            fullPathOfImage = fullPath;
+            imageName = nameOfImage;
         }
         private void EditPhotoForm_Load(object sender, EventArgs e)
         {
-           // myImage = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\spidermanlogo.jpg");
+            // myImage = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\spidermanlogo.jpg");
             transformedBitmap = new Bitmap(myImage);
             LoadImage(myImage);
         }
@@ -39,7 +44,8 @@ namespace PhotoEditor
         private void SaveButton_Click(object sender, EventArgs e)
         {
             myImage = (Image)transformedBitmap;
-            //myImage.Save("myphoto.jpg", ImageFormat.Jpeg); 
+            myImage.Save(fullPathOfImage + "\\" + "Transformed" + DateTime.Now.Ticks + imageName, ImageFormat.Jpeg);
+            Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -51,8 +57,8 @@ namespace PhotoEditor
         {
             ColorDialog colorBox = new ColorDialog();
             if (colorBox.ShowDialog() == DialogResult.OK)
-            { 
-               await ChangeColors(colorBox.Color);
+            {
+                await ChangeColors(colorBox.Color);
             }
             Image tintedImage = (Image)transformedBitmap;
             LoadImage(tintedImage);
@@ -133,7 +139,7 @@ namespace PhotoEditor
             UseWaitCursor = true;
 
             await Task.Run(() =>
-            { 
+            {
                 for (int y = 0; y < transformedBitmap.Height; y++)
                 {
                     for (int x = 0; x < transformedBitmap.Width; x++)
