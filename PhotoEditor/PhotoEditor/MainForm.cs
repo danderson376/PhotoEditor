@@ -9,6 +9,7 @@ namespace PhotoEditor
 {
     public partial class MainForm : Form
     {
+
 	    private PhotoListing _photoListing;
 	    private string _fullPath;
 	    public delegate TreeView Add();
@@ -26,12 +27,13 @@ namespace PhotoEditor
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
-            var photoList = new ListView();
+            //var photoList = new ListView();
             await InitializePhotoList_Async();
             await ListDirectory();
         }
 
         private async Task InitializePhotoList_Async() //example to get double click to work. Need to change to get photos from disk
+
         {
 	        await Task.Run(() =>
 	        {
@@ -67,6 +69,7 @@ namespace PhotoEditor
 		        listView1.Invoke(new AddImageList(() => listView1.LargeImageList = largImageList));
 		        listView1.Invoke(new GetView(() => this.listView1.View = View.Details));
 			});
+
         }
 
         public async Task ListDirectory()
@@ -84,18 +87,22 @@ namespace PhotoEditor
         {                                                                        //Username of Author: XIVSolutions
             ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);
             ListViewItem item = info.Item;
+            Image image = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\" + item.ImageKey);
 
-//            if (item != null)
-//            {
-//                //MessageBox.Show("The selected Item Name is: " + item.Text);
-//                EditPhotoForm editBox = new EditPhotoForm();  //creates new editBox Every time an item is double clicked
-//                editBox.ShowDialog(this);
-//            }
-//            else
-//            {
-//                this.listView1.SelectedItems.Clear();
-//                MessageBox.Show("No Item is selected");
-//            }
+
+
+            if (item != null)
+            {
+                //MessageBox.Show("The selected Item Name is: " + item.Text);
+                EditPhotoForm editBox = new EditPhotoForm(image);  //creates new editBox Every time an item is double clicked
+                editBox.ShowDialog(this);
+            }
+            else
+            {
+                this.PhotoList.SelectedItems.Clear();
+                MessageBox.Show("No Item is selected");
+            }
+
         }
 
 		private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
