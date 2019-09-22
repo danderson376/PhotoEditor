@@ -4,20 +4,27 @@ using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PhotoEditor
 {
     public partial class MainForm : Form
     {
-
+        private CancellationTokenSource cancellationTokenSource;
+        private CancellationToken cancellationToken;
+        private int lengthOfFiles;
 	    private PhotoListing _photoListing;
 	    private string _fullPath;
 	    public delegate TreeView Add();
+        public delegate void HideProgress();
+        public delegate void SetTotalAmount();
+        public delegate void AddToProgressBar();
 	    public delegate TreeView Find();
 	    public delegate void AddColumn();
 		public delegate ListViewItem AddListItem();
 	    public delegate ImageList AddImageList();
-
 	    public delegate View GetView();
 		public delegate void Clear();
 		public MainForm()
@@ -27,13 +34,12 @@ namespace PhotoEditor
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
-            //var photoList = new ListView();
             await InitializePhotoList_Async();
             await ListDirectory();
+            await GetListView(_fullPath);
         }
 
         private async Task InitializePhotoList_Async() //example to get double click to work. Need to change to get photos from disk
-
         {
 	        await Task.Run(() =>
 	        {
@@ -45,9 +51,19 @@ namespace PhotoEditor
         private async Task GetListView(string PathDirectoryString)
         {
 	        var columnsCount = listView1.Columns.Count;
-	        var k = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
-	        var homeDir = new DirectoryInfo(k + "\\" + PathDirectoryString);
-			await Task.Run(() =>
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
+            var k = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+            DirectoryInfo homeDir;
+            if (_fullPath.Contains("c:") || _fullPath.Contains("C:"))
+            {
+                homeDir = new DirectoryInfo(PathDirectoryString);
+            }
+            else
+            {
+                homeDir = new DirectoryInfo(k + "\\" + PathDirectoryString);
+            }
+            await Task.Run(() =>
 	        {
 		        if (columnsCount == 0)
 		        {
@@ -59,15 +75,32 @@ namespace PhotoEditor
 		        ImageList largImageList = new ImageList();
 		        largImageList.ImageSize = new Size(128, 128);
 		        listView1.Invoke(new Clear(() => this.listView1.Items.Clear()));
-		        var i = 0;
-		        foreach (var file in homeDir.GetFiles("*.jpg"))
+                lengthOfFiles = homeDir.GetFiles("*.jpg").GetLength(0);
+                this.Invoke(new SetTotalAmount(() => this.progressBar1.Value = 0));
+                this.Invoke(new SetTotalAmount(() => this.progressBar1.Maximum = lengthOfFiles));
+                progressBar1.Invoke(new HideProgress(() => this.progressBar1.Visible = true));
+                var i = 0;
+              
+                foreach (var file in homeDir.GetFiles("*.jpg"))
 		        {
-			        var itemPerFile = _photoListing.GetFilesAndImages(file,ref smallImageList,ref largImageList,ref i);
-			        listView1.Invoke(new AddListItem(() => this.listView1.Items.Add(itemPerFile)));
+                    if (cancellationTokenSource.IsCancellationRequested != true)
+                    {
+                        var itemPerFile = _photoListing.GetFilesAndImages(file, ref smallImageList, ref largImageList, ref i);
+                        listView1.Invoke(new AddListItem(() => this.listView1.Items.Add(itemPerFile)));
+                        if (i <= lengthOfFiles && i > 0)
+                        {
+                            progressBar1.Invoke(new AddToProgressBar(() => this.progressBar1.Value = i));
+                        }
+                        else
+                        {
+                            cancellationTokenSource.Cancel();
+                        }
+                    }
 				}
 		        listView1.Invoke(new AddImageList(() => listView1.SmallImageList = smallImageList));
 		        listView1.Invoke(new AddImageList(() => listView1.LargeImageList = largImageList));
 		        listView1.Invoke(new GetView(() => this.listView1.View = View.Details));
+                progressBar1.Invoke(new HideProgress(() => this.progressBar1.Visible = false));
 			});
 
         }
@@ -76,20 +109,17 @@ namespace PhotoEditor
 		{
 			await Task.Run(() =>
 			{
-				var p = _photoListing.ListDirectory();
-				Action showTreeView = () => treeView1.Nodes.Add(p);
-				this.Invoke(showTreeView);
-				int i = 0;
+				var treeNodeHolder = _photoListing.ListDirectory();
+				Action showTreeView = () => treeView1.Nodes.Add(treeNodeHolder);
+				Invoke(showTreeView);
 			});
 		}
 
 		private void PhotoList_MouseDoubleClick(object sender, MouseEventArgs e) //found this function at https://stackoverflow.com/questions/12872740/doubleclick-on-a-row-in-listview 
         {                                                                        //Username of Author: XIVSolutions
-            ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);
+            ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);              
             ListViewItem item = info.Item;
             Image image = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\" + item.ImageKey);
-
-
 
             if (item != null)
             {
@@ -99,7 +129,7 @@ namespace PhotoEditor
             }
             else
             {
-                this.PhotoList.SelectedItems.Clear();
+                this.listView1.SelectedItems.Clear();
                 MessageBox.Show("No Item is selected");
             }
 
@@ -107,7 +137,7 @@ namespace PhotoEditor
 
 		private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AboutForm aboutBox = new AboutForm();  //creates new editBox Every time an item is double clicked
+            AboutForm aboutBox = new AboutForm();  
             aboutBox.ShowDialog(this);
 		}
 
@@ -128,8 +158,8 @@ namespace PhotoEditor
 
 		private void SelectRootFolderToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			var t = new System.Windows.Forms.FolderBrowserDialog();
-			t.ShowDialog();
+			var rootFolder = new System.Windows.Forms.FolderBrowserDialog();
+			rootFolder.ShowDialog();
 		}
 
 		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -164,15 +194,25 @@ namespace PhotoEditor
 			this.listView1.View = View.LargeIcon;
 		}
 
-		//		if (cancellationTokenSource != null)
-		//        {
-		//	        cancellationTokenSource.Cancel();
-		//	        // Wait until the task has been cancelled
-		//	        while (cancellationTokenSource != null)
-		//	        {
-		//		        Application.DoEvents();
-		//	        }
-		//        }
+        private async void ProgressBar1_Click(object sender, EventArgs e)
+        {
+           
+        }
 
-	}
+        private void BackgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+
+        }
+
+        		//if (cancellationTokenSource != null)
+          //      {
+        	 //       cancellationTokenSource.Cancel();
+        	 //       // Wait until the task has been cancelled
+        	 //       while (cancellationTokenSource != null)
+        	 //       {
+        		//        Application.DoEvents();
+        	 //       }
+
+
+    }
 }
