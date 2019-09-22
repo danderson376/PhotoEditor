@@ -49,7 +49,7 @@
             this.progressBar1.Size = new System.Drawing.Size(152, 27);
             this.progressBar1.TabIndex = 1;
             // 
-            // loadingForm
+            // LoadingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -58,9 +58,10 @@
             this.Controls.Add(this.cancelButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.Name = "loadingForm";
+            this.Name = "LoadingForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Transforming";
+            this.Load += new System.EventHandler(this.LoadingForm_Load);
             this.ResumeLayout(false);
 
         }

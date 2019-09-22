@@ -16,7 +16,7 @@ namespace PhotoEditor
         private Image myImage;
         Bitmap transformedBitmap;
 
-        private CancellationTokenSource cancellationTokenSource;
+        
 
         public EditPhotoForm(Image img)
         {
@@ -57,60 +57,35 @@ namespace PhotoEditor
             Image tintedImage = (Image)transformedBitmap;
             LoadImage(tintedImage);
         }
-        private async void InvertButton_Click(object sender, EventArgs e) //need to make async, progress bar, 
+        private void InvertButton_Click(object sender, EventArgs e) //need to make async, progress bar, 
         {
-            await InvertColors();
-            Image invertedImage = (Image)transformedBitmap;
+            //await InvertColors();
+            LoadingForm loadingForm = new LoadingForm(myImage);
 
-            if (cancellationTokenSource.IsCancellationRequested)
+            var result = loadingForm.ShowDialog();
+            if (result == DialogResult.OK)
             {
-                LoadImage(myImage);
+                transformedBitmap = loadingForm.invertedBitmap;            //values preserved after close
+                Image invertedImage = (Image)transformedBitmap;
+                LoadImage(invertedImage);
             }
             else
             {
-                LoadImage(invertedImage);
+                Console.WriteLine("Stopped inversion of colors.");
+                LoadImage(myImage);
             }
+
+            //if (cancellationTokenSource.IsCancellationRequested)
+            //{
+            //    LoadImage(myImage);
+            //}
+            //else
+            //{
+            //    LoadImage(invertedImage);
+            //}
         }
 
-        private async Task InvertColors()
-        {
-            UseWaitCursor = true;
-
-            cancellationTokenSource = new CancellationTokenSource();
-            var token = cancellationTokenSource.Token;
-
-            LoadingForm loadingForm = new LoadingForm();
-
-            await Task.Run(() =>
-            {
-                for (int y = 0; y < transformedBitmap.Height; y++)
-                {
-                    for (int x = 0; x < transformedBitmap.Width; x++)
-                    {
-                        try
-                        {
-                            Color color = transformedBitmap.GetPixel(x, y);
-                            int newRed = Math.Abs(color.R - 255);
-                            int newGreen = Math.Abs(color.G - 255);
-                            int newBlue = Math.Abs(color.B - 255);
-                            Color newColor = Color.FromArgb(newRed, newGreen, newBlue);
-                            transformedBitmap.SetPixel(x, y, newColor);
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Could not Invert Colors");
-                        }
-
-                        if (token.IsCancellationRequested)
-                            break;
-                    }
-                    if (token.IsCancellationRequested)
-                        break;
-
-                }
-            });
-            UseWaitCursor = false;
-        }
+        
 
         private async Task ChangeColors(Color tintColor)
         {
