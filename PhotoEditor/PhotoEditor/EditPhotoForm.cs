@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,6 +15,8 @@ namespace PhotoEditor
     {
         private Image myImage;
         Bitmap transformedBitmap;
+
+        private CancellationTokenSource cancellationTokenSource;
 
         public EditPhotoForm(Image img)
         {
@@ -58,15 +61,25 @@ namespace PhotoEditor
         {
             await InvertColors();
             Image invertedImage = (Image)transformedBitmap;
-            LoadImage(invertedImage);
+
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                LoadImage(myImage);
+            }
+            else
+            {
+                LoadImage(invertedImage);
+            }
         }
 
         private async Task InvertColors()
         {
             UseWaitCursor = true;
 
-            //cancellationTokenSource = new CancellationTokenSource();
-            //var token = cancellationTokenSource.Token;
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+
+            LoadingForm loadingForm = new LoadingForm();
 
             await Task.Run(() =>
             {
@@ -87,7 +100,13 @@ namespace PhotoEditor
                         {
                             Console.WriteLine("Could not Invert Colors");
                         }
+
+                        if (token.IsCancellationRequested)
+                            break;
                     }
+                    if (token.IsCancellationRequested)
+                        break;
+
                 }
             });
             UseWaitCursor = false;

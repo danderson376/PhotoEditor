@@ -106,6 +106,7 @@
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.saveButton);
             this.Name = "EditPhotoForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "EditPhotoForm";
             this.Load += new System.EventHandler(this.EditPhotoForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
