@@ -4,30 +4,26 @@ using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PhotoEditor
 {
     public partial class MainForm : Form
     {
-        private CancellationTokenSource cancellationTokenSource;
-        private CancellationToken cancellationToken;
-        private int lengthOfFiles;
-        private PhotoListing _photoListing;
-        private string _fullPath;
-        private View mainView;
-        public delegate TreeView Add();
+        private CancellationTokenSource cancellationTokenSource { get; set; }
+        private int lengthOfFiles { get; set; }
+        private PhotoListing _photoListing { get; set; }
+        private string _fullPath { get; set; }
+        private View mainView { get; set; }
         public delegate void HideProgress();
         public delegate void SetTotalAmount();
         public delegate void AddToProgressBar();
-        public delegate TreeView Find();
         public delegate void AddColumn();
         public delegate ListViewItem AddListItem();
         public delegate ImageList AddImageList();
         public delegate View GetView();
         public delegate void Clear();
+
         public MainForm()
         {
             InitializeComponent();
@@ -50,38 +46,38 @@ namespace PhotoEditor
             });
         }
 
+        private DirectoryInfo getDirectoryInfo(string PathDirectoryString)
+        {
+	        var systemDirectoryInfo = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+	        var homeDir = (_fullPath.Contains("c:") || _fullPath.Contains("C:"))
+		        ? new DirectoryInfo(PathDirectoryString)
+		        : new DirectoryInfo(systemDirectoryInfo + "\\" + PathDirectoryString);
+	        return homeDir;
+        }
+
         private async Task GetListView(string PathDirectoryString)
         {
             var columnsCount = listView1.Columns.Count;
             cancellationTokenSource = new CancellationTokenSource();
-            cancellationToken = cancellationTokenSource.Token;
-            var k = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
-            DirectoryInfo homeDir;
-            if (_fullPath.Contains("c:") || _fullPath.Contains("C:"))
-            {
-                homeDir = new DirectoryInfo(PathDirectoryString);
-            }
-            else
-            {
-                homeDir = new DirectoryInfo(k + "\\" + PathDirectoryString);
-            }
+            var homeDir = getDirectoryInfo(PathDirectoryString);
+
             await Task.Run(() =>
             {
-                if (columnsCount == 0)
+	            ImageList smallImageList = new ImageList { ImageSize = new Size(64, 64) };
+	            ImageList largImageList = new ImageList { ImageSize = new Size(128, 128) };
+	            lengthOfFiles = homeDir.GetFiles("*.jpg").GetLength(0);
+	            var i = 0;
+
+				if (columnsCount == 0)
                 {
                     var columns = _photoListing.GetColumnHeader();
                     listView1.Invoke(new AddColumn(() => listView1.Columns.AddRange(columns)));
                 }
-                ImageList smallImageList = new ImageList();
-                smallImageList.ImageSize = new Size(64, 64);
-                ImageList largImageList = new ImageList();
-                largImageList.ImageSize = new Size(128, 128);
-                listView1.Invoke(new Clear(() => this.listView1.Items.Clear()));
-                lengthOfFiles = homeDir.GetFiles("*.jpg").GetLength(0);
-                this.Invoke(new SetTotalAmount(() => this.progressBar1.Value = 0));
+
+				listView1.Invoke(new Clear(() => this.listView1.Items.Clear()));
+				this.Invoke(new SetTotalAmount(() => this.progressBar1.Value = 0));
                 this.Invoke(new SetTotalAmount(() => this.progressBar1.Maximum = lengthOfFiles));
                 progressBar1.Invoke(new HideProgress(() => this.progressBar1.Visible = true));
-                var i = 0;
 
                 foreach (var file in homeDir.GetFiles("*.jpg"))
                 {
@@ -104,6 +100,7 @@ namespace PhotoEditor
                 listView1.Invoke(new AddImageList(() => listView1.LargeImageList = largImageList));
                 listView1.Invoke(new GetView(() => this.listView1.View = mainView));
                 progressBar1.Invoke(new HideProgress(() => this.progressBar1.Visible = false));
+
                 if (cancellationTokenSource.IsCancellationRequested == true)
                 {
                     GetListView(_fullPath);
@@ -150,7 +147,7 @@ namespace PhotoEditor
 
         private void LocateOnDiskToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var k = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+            var systemDirectoryInfo = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
             DirectoryInfo homeDir;
             if (_fullPath.Contains("c:") || _fullPath.Contains("C:"))
             {
@@ -158,7 +155,7 @@ namespace PhotoEditor
             }
             else
             {
-                homeDir = new DirectoryInfo(k + "\\" + _fullPath);
+                homeDir = new DirectoryInfo(systemDirectoryInfo + "\\" + _fullPath);
             }
             Process.Start(homeDir.FullName);
         }
@@ -180,12 +177,6 @@ namespace PhotoEditor
             await GetListView(_fullPath);
         }
 
-
-        private void PhotoList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void DetailToolStripMenuItem_Click(object sender, EventArgs e)
         {
             mainView = View.Details;
@@ -203,27 +194,6 @@ namespace PhotoEditor
             mainView = View.LargeIcon;
             this.listView1.View = View.LargeIcon;
         }
-
-        private async void ProgressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void BackgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
-        {
-
-        }
-
-        //if (cancellationTokenSource != null)
-        //      {
-        //       cancellationTokenSource.Cancel();
-        //       // Wait until the task has been cancelled
-        //       while (cancellationTokenSource != null)
-        //       {
-        //        Application.DoEvents();
-        //       }
-
-
     }
 }
 

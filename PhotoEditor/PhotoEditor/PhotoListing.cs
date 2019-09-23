@@ -36,7 +36,6 @@ namespace PhotoEditor
 
 		public ColumnHeader[] GetColumnHeader()
 		{
-			
 			ColumnHeader columnHeader1 = new ColumnHeader();
 			ColumnHeader columnHeader2 = new ColumnHeader();
 			ColumnHeader columnHeader3 = new ColumnHeader();
