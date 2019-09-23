@@ -8,6 +8,8 @@ Mainform loads in all folders(in the tree view) and corresponding photos(in the 
 
 Robert -> With respect to switching between large directories of jpg, there is a little 
           stuttering, but it does generate the list correctly.
+          
+Robert -> Also the Loading Form when inverting colors does generate and work Except for the Close. The CLOSE does not Work. It will Crash          
 
 //Any Extra Credit
 
@@ -15,10 +17,10 @@ Robert -> With respect to switching between large directories of jpg, there is a
 
 David Anderson: Added Franework For forms, Added EditForm Image Transformation Functionality
 
-Robert Thompson:  Added TreeView, Added List View, Added Async functionality, nd number 1,2,3,7
+Robert Thompson:  Added TreeView, Added List View, Added Async functionality, and assignment bullet numbers 1,2,3,7, part of 5
                   
 //Percentage of work done by each teammate
 
-David Anderson:50%
+David Anderson:45%
 
-Robert Thompson:50%
+Robert Thompson:55%
