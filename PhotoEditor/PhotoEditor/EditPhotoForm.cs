@@ -18,6 +18,7 @@ namespace PhotoEditor
         Bitmap transformedBitmap;
         private string fullPathOfImage;
         private string imageName;
+        
         private CancellationTokenSource cancellationTokenSource;
 
 
@@ -27,12 +28,16 @@ namespace PhotoEditor
             myImage = img;
             fullPathOfImage = fullPath;
             imageName = nameOfImage;
+            //brightnessBar = new TrackBar();
         }
         private void EditPhotoForm_Load(object sender, EventArgs e)
         {
             // myImage = Image.FromFile("C:\\Users\\dalac\\OneDrive\\Pictures\\spidermanlogo.jpg");
             transformedBitmap = new Bitmap(myImage);
             LoadImage(myImage);
+            brightnessTrackBar.Maximum = 100;
+            brightnessTrackBar.Minimum = 0;
+            brightnessTrackBar.Value = 50;
         }
 
         private void LoadImage(Image img)
@@ -67,20 +72,7 @@ namespace PhotoEditor
         {
             await InvertColors();
             Image invertedImage = (Image)transformedBitmap;
-            //LoadingForm loadingForm = new LoadingForm(myImage);
-
-            //var result = loadingForm.ShowDialog();
-            //if (result == DialogResult.OK)
-            //{
-            //    transformedBitmap = loadingForm.invertedBitmap;            //values preserved after close
-            //    Image invertedImage = (Image)transformedBitmap;
-            //    LoadImage(invertedImage);
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Stopped inversion of colors.");
-            //    LoadImage(myImage);
-            //}
+           
 
             if (cancellationTokenSource.IsCancellationRequested)
             {
@@ -182,5 +174,82 @@ namespace PhotoEditor
             UseWaitCursor = false;
         }
 
+        private async void BrightnessTrackBar_MouseUp(object sender, MouseEventArgs e)
+        {
+            
+            await changeBrightness();
+            Image invertedImage = (Image)transformedBitmap;
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                LoadImage(myImage);
+            }
+            else
+            {
+                LoadImage(invertedImage);
+            }
+        }
+
+        private async Task changeBrightness()
+        {
+            int amount = Convert.ToInt32(2 * (50 - brightnessTrackBar.Value) * 0.01 * 255);
+            MessageBox.Show(amount.ToString());
+            UseWaitCursor = true;
+
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+
+            await Task.Run(() =>
+            {
+                for (int y = 0; y < transformedBitmap.Height; y++)
+                {
+                    for (int x = 0; x < transformedBitmap.Width; x++)
+                    {
+                        try
+                        {
+                            Color color = transformedBitmap.GetPixel(x, y);
+
+                            int newRed = (color.R - amount); //found this formula at https://stackoverflow.com/questions/4699762/how-do-i-recolor-an-image-see-images                                                                       
+                            int newGreen = (color.G - amount); //Author Usernames: CodesInChaos and Aliostad 
+                            int newBlue = (color.B - amount);
+
+                            if (newRed > 255)
+                            {
+                                newRed = 255;
+                            }
+                            else if (newRed < 0)
+                            {
+                                newRed = 0;
+                            }
+
+                            if (newGreen > 255)
+                            {
+                                newGreen = 255;
+                            }
+                            else if (newGreen < 0)
+                            {
+                                newGreen = 0;
+                            }
+
+                            if (newBlue > 255)
+                            {
+                                newBlue = 255;
+                            }
+                            else if (newBlue < 0)
+                            {
+                                newBlue = 0;
+                            }
+
+                            Color newColor = Color.FromArgb(newRed, newGreen, newBlue);
+                            transformedBitmap.SetPixel(x, y, newColor);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Could not Tint Image");
+                        }
+                    }
+                }
+            });
+            UseWaitCursor = false;
+        }
     }
-}
+    }

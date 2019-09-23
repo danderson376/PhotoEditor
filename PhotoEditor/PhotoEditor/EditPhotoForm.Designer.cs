@@ -73,6 +73,8 @@
             this.brightnessTrackBar.Name = "brightnessTrackBar";
             this.brightnessTrackBar.Size = new System.Drawing.Size(142, 45);
             this.brightnessTrackBar.TabIndex = 3;
+            this.brightnessTrackBar.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.brightnessTrackBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.BrightnessTrackBar_MouseUp);
             // 
             // colorButton
             // 
