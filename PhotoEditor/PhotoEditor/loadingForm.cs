@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,35 +9,41 @@ namespace PhotoEditor
     {
         //private Image myImage;
         //public Bitmap invertedBitmap;
-        public LoadingForm()
+        public delegate void DoWorkLoad();
+        public delegate void DoWorkLoad2();
+
+        public CancellationTokenSource CancellationTokenSource;
+		public LoadingForm()
         {
             InitializeComponent();
-            //invertedBitmap = new Bitmap(img);
-            // myImage = img;
-            //startButton.Enabled = false;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Visible = true;
             cancelButton.Enabled = true;
-            // pauseButton.Enabled = true;
-            //startNumTextBox.Enabled = false;
-            //endNumTextBox.Enabled = false;
-            //pauseButton.Text = "Pause";
             this.DialogResult = DialogResult.OK;
         }
-        private void CancelButton_Click(object sender, EventArgs e)
+        private async void CancelButton_Click(object sender, EventArgs e)
         {
-            //this.invertedBitmap = new Bitmap(myImage);
-            //this.DialogResult = DialogResult.Cancel;
-            Close();
+	        CancellationTokenSource =new CancellationTokenSource();
         }
 
-        private async void LoadingForm_Load(object sender, EventArgs e)
+        public void LoadingForm_Load(object sender, EventArgs e)
         {
-            //await InvertColors();
-
+	        
         }
 
-
-    }
+        public async Task Addprogress(int i, int maximum)
+        {
+	        progressBar1.Maximum = maximum;
+	        progressBar1.Value = i;
+//	        Invoke(new DoWorkLoad(() => progressBar1.Maximum = maximum));
+//	        Invoke(new DoWorkLoad2(() => progressBar1.Value = i));
+        }
+		//        await Task.Run(() =>
+		//
+		//        {
+		//	        Invoke(new DoWorkLoad(() => progressBar1.Maximum = maximum));
+		//	        Invoke(new DoWorkLoad(() => progressBar1.Value = i));
+		//        });
+	}
 }

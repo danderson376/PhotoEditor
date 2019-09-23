@@ -124,7 +124,9 @@ namespace PhotoEditor
         {                                                                        //Username of Author: XIVSolutions
             ListViewHitTestInfo info = listView1.HitTest(e.X, e.Y);
             ListViewItem item = info.Item;
-            Image image = Image.FromFile(_fullPath + "\\" + item.Text);
+            var homedir = getDirectoryInfo(_fullPath);
+            var holderString = homedir.FullName +"\\" +item.Text;
+            Image image = Image.FromFile(holderString);
 
             if (image != null)
             {

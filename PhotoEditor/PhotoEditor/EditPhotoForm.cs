@@ -18,7 +18,8 @@ namespace PhotoEditor
         Bitmap transformedBitmap;
         private string fullPathOfImage;
         private string imageName;
-        
+
+        public delegate void DoLoading();
         private CancellationTokenSource cancellationTokenSource;
 
 
@@ -90,12 +91,13 @@ namespace PhotoEditor
 
             cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;
-
-            //LoadingForm loadingForm = new LoadingForm();
-
-            await Task.Run(() =>
+            LoadingForm loadingForm = new LoadingForm();
+            
+			await Task.Run(async () =>
             {
-                for (int y = 0; y < transformedBitmap.Height; y++)
+	            loadingForm.Show();
+				int transformedMaxValue = transformedBitmap.Height;
+	            for (int y = 0; y < transformedBitmap.Height; y++)
                 {
                     for (int x = 0; x < transformedBitmap.Width; x++)
                     {
@@ -107,20 +109,23 @@ namespace PhotoEditor
                             int newBlue = Math.Abs(color.B - 255);
                             Color newColor = Color.FromArgb(newRed, newGreen, newBlue);
                             transformedBitmap.SetPixel(x, y, newColor);
+	                        loadingForm.Addprogress(y, transformedMaxValue);
+	                        loadingForm.Update();
                         }
                         catch
                         {
                             Console.WriteLine("Could not Invert Colors");
                         }
 
-                        if (token.IsCancellationRequested)
+                        if (loadingForm.CancellationTokenSource!=null)
                             break;
                     }
-                    if (token.IsCancellationRequested)
+                    if (loadingForm.CancellationTokenSource != null)
                         break;
 
                 }
-            });
+				loadingForm.Dispose();
+			});
 
             UseWaitCursor = false;
             //Close();
